@@ -2,27 +2,34 @@
 
 # CLAUDE.md — TIR-RAG
 
-<Une phrase : ce que fait le produit, pour qui.> Dépôt partagé avec : <noms>.
+Chatbot RAG (projet TIR) qui répond sur les tendances technologiques à partir de rapports PDF (Banque mondiale, WEF, McKinsey, Deloitte, OCDE). Dépôt partagé avec : Guillermo (auteur du code d'origine), Eliot, Damien.
 Config du socle : `_dev/projet.json`. Règles communes : `.claude/CLAUDE-commun.md` (ne pas dupliquer ici).
 
 ## Stack
 
-- <langage, framework, base, cible de déploiement>
-- <ce qui est généré : ne pas l'éditer>
+- Backend `backend/` : Python 3.11+, FastAPI, Poetry, Redis Stack (RedisJSON + RediSearch) comme base vectorielle, API OpenAI (`gpt-4.1-mini`, embeddings `text-embedding-3-large`).
+- Frontend `frontend/` : React 19 + Vite 6 + Tailwind 4, port 3000 ; l'API écoute sur 8000 (`VITE_API_URL`).
+- Générés (ne pas éditer à la main) : `backend/poetry.lock`, `frontend/package-lock.json`.
 
 ## Commandes
 
 ```bash
-<installer>        # cf. commandes.installer
-<lancer>           # cf. commandes.lancer
-<tester>           # cf. commandes.tester
+(command -v poetry >/dev/null || pipx install poetry) && poetry -C backend install --no-interaction && npm --prefix frontend ci --no-audit --no-fund   # cf. commandes.installer
+cd backend && poetry run fastapi dev app/main.py   # API (Redis + backend/.env requis)
+npm --prefix frontend run dev                      # front, http://localhost:3000
+npm --prefix frontend run build                    # cf. commandes.construire
 ```
 
 ## Gros risques du projet
 
-En plus de `CLAUDE-commun.md` § 3 (reprendre `risques` de `projet.json`) :
-- ⛔ <commande ou geste qui écrit en prod>
+En plus de `CLAUDE-commun.md` § 3 :
+- ⛔ `poetry run load` réindexe les PDF dans Redis et consomme l'API d'embeddings OpenAI (payant) : pas sans GO.
+- ⛔ Ne commite ni `.venv/` ni un `.env` ; ne pousse pas sur `main` ni `master`.
 
 ## Pièges
 
-- <un piège = une phrase impérative>
+- Le dépôt versionne un `.venv/` Windows à la racine (12 700 fichiers, venv d'Eliot) : ne l'utilise pas, il fait rougir `verifier-tout` (faux secrets dans `site-packages`) ; le vrai venv Poetry vit hors dépôt (`~/.cache/pypoetry/virtualenvs`).
+- `main` et `master` n'ont aucun ancêtre commun : `main` (défaut GitHub) porte une vieille version Streamlit, le code FastAPI/React est sur `master`.
+- `poetry.lock` est dans `backend/`, pas à la racine : la CI du socle ne détecte pas Poetry, d'où le `pipx install poetry` de repli dans `installer`.
+- Il n'y a aucun test ; `npm --prefix frontend run lint` échoue aujourd'hui.
+- `app/config.py` exige `OPENAI_API_KEY` à l'import : sans `backend/.env`, rien ne démarre (ne lis jamais ce fichier).

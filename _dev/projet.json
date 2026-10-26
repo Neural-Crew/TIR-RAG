@@ -5,31 +5,28 @@
   "stack": "python",
   "prefixeEcopilot": null,
   "branches": {
-    "reference": "VAL",
-    "environnements": [
-      "INT",
-      "VAL",
-      "PROD"
-    ],
+    "reference": null,
+    "environnements": null,
     "protegees": [
       "main",
-      "INT",
-      "VAL",
-      "PROD"
+      "master"
     ]
   },
   "ports": {
-    "front": null,
-    "api": null,
-    "cdp": null,
-    "cockpit": null
+    "front": 3000,
+    "api": 8000,
+    "cdp": 10233,
+    "cockpit": 7797
   },
   "commandes": {
-    "installer": "cd backend && poetry install",
+    "installer": "(command -v poetry >/dev/null || pipx install poetry) && poetry -C backend install --no-interaction && npm --prefix frontend ci --no-audit --no-fund",
     "verifier": "node {outils}/verifier-tout.js",
     "tester": null,
-    "construire": null,
-    "lancer": null,
+    "construire": "npm --prefix frontend run build",
+    "lancer": {
+      "api": "cd backend && poetry run fastapi dev app/main.py",
+      "front": "npm --prefix frontend run dev"
+    },
     "deployer": {
       "INT": null,
       "VAL": null,
@@ -49,17 +46,30 @@
   },
   "code": {
     "racines": [
-      "backend",
-      "frontend"
+      "backend/app",
+      "frontend/src"
     ],
-    "syntaxe": null,
+    "syntaxe": [
+      "frontend/src/**/*.js",
+      "frontend/*.js"
+    ],
     "prefixesDoc": [
       "_dev",
       "backend",
       "frontend"
     ],
-    "generes": null,
-    "zoneCommit": null
+    "generes": [
+      "backend/poetry.lock",
+      "frontend/package-lock.json"
+    ],
+    "zoneCommit": [
+      "backend/app",
+      "backend/data/docs",
+      "frontend/src",
+      "frontend/public",
+      "_dev",
+      "README.md"
+    ]
   },
   "registres": {
     "bugs": null,
@@ -82,6 +92,10 @@
   "reviewer": {
     "criteres": null
   },
-  "risques": [],
+  "risques": [
+    "poetry run load : réindexe les PDF dans Redis et appelle l'API d'embeddings OpenAI (payant)",
+    "commiter .venv/ ou un .env : le dépôt versionne déjà un .venv Windows de 12 700 fichiers",
+    "pousser sur main ou master (deux branches de référence, main par défaut sur GitHub)"
+  ],
   "modeles": {}
 }
