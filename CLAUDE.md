@@ -28,7 +28,7 @@ En plus de `CLAUDE-commun.md` § 3 :
 
 ## Pièges
 
-- Le dépôt versionne un `.venv/` Windows à la racine (12 700 fichiers, venv d'Eliot) : ne l'utilise pas, il fait rougir `verifier-tout` (faux secrets dans `site-packages`) ; le vrai venv Poetry vit hors dépôt (`~/.cache/pypoetry/virtualenvs`).
+- `master` versionne un `.venv/` Windows à la racine (12 700 fichiers, venv d'Eliot). Il est retiré du suivi et ignoré sur `dev/socle-claude` depuis le 27/10/2026 : à la fusion, git le supprimera des clones, ce qui est voulu. Le vrai venv Poetry vit hors dépôt (`~/.cache/pypoetry/virtualenvs`).
 - `main` et `master` n'ont aucun ancêtre commun : `main` (défaut GitHub) porte une vieille version Streamlit, le code FastAPI/React est sur `master`.
 - `poetry.lock` est dans `backend/`, pas à la racine : la CI du socle ne détecte pas Poetry, d'où le `pipx install poetry` de repli dans `installer`.
 - Il n'y a aucun test ; `npm --prefix frontend run lint` échoue aujourd'hui.
